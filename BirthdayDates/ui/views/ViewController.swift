@@ -16,6 +16,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var birthdayLabel2: UILabel!
     @IBOutlet weak var birtdayImage: UIImageView!
     
+    var viewModel = BirthdayViewModel()
+    var brthday: Birthday?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -27,42 +30,36 @@ class ViewController: UIViewController {
         if let newName = storedName as? String {
             nameLabel2.text = "Name: \(newName)"
         }
+        
         if let newBirthday = storedBirthday as? String{
             birthdayLabel2.text = "Birthday: \(newBirthday)"
         }
+        
+        _ = viewModel.birthday.subscribe(onNext: { birthday in
+            self.brthday = birthday
+        })
     }
     
     
     @IBAction func button(_ sender: Any) {
-        
-        UserDefaults.standard.set(nameField.text!, forKey: "name")
-        UserDefaults.standard.set(birthdayField.text!, forKey: "birthday")
-        // UserDefaults.standard.synchronize() => We don't use it anymore.
-        
-        nameLabel2.text = "Name: \(nameField.text!)"
-        birthdayLabel2.text = "Birthday: \(birthdayField.text!)"
-        
-        
-        
+        createNewData()
     }
 
     @IBAction func buttonDelete(_ sender: Any) {
-        
-        let storedName = UserDefaults.standard.object(forKey: "name")
-        let storedBirthday = UserDefaults.standard.object(forKey: "birthday")
-        
-        if (storedName as? String) != nil {
-            UserDefaults.standard.removeObject(forKey: "name")
-            nameLabel2.text = "Name: "
+        deleteData()
+    }
+    
+    func createNewData() {
+        if let brtName = nameField.text, let brtDate = birthdayField.text {
+            self.viewModel.loadDatas(name: brtName, date: brtDate)
         }
-        
-        if (storedBirthday as? String) != nil {
-            UserDefaults.standard.removeObject(forKey: "birthday")
-            birthdayLabel2.text = "Birthday: "
-            
-        }
-        
-        
-        
+        nameLabel2.text = "Name: \(nameField.text!)"
+        birthdayLabel2.text = "Birthday: \(birthdayField.text!)"
+    }
+    
+    func deleteData() {
+        viewModel.removeData()
+        self.nameField.text = "Name: "
+        self.birthdayField.text = "Birthday: "
     }
 }
